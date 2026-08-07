@@ -1,0 +1,14 @@
+[package]
+name = "backend_for_marketplace"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.9.0", features = ["runtime-tokio", "postgres", "macros"] }
+dotenvy = "0.15.7"
+axum = "0.7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
