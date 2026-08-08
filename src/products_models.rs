@@ -7,6 +7,7 @@ pub struct Product{
    pub description:String,
    pub price:i64,
    pub stock:i32,
+   pub category_id: Option<i64>,
 }
 #[derive(Serialize,Deserialize)]
 pub struct CreateProduct {
@@ -14,6 +15,7 @@ pub struct CreateProduct {
     pub description: String,
     pub price: i64,
     pub stock: i32,
+    pub category_id: i64,
 }
 #[derive(Serialize,Deserialize)]
 pub struct UpdateProduct {
@@ -26,9 +28,4 @@ pub struct UpdateProduct {
 pub struct Pagination {
     pub page: Option<u32>,
     pub limit: Option<u32>,
-}
-#[derive(Deserialize)]
-struct SearchParams {
-    q: String,
-    limit: Option<usize>,
 }
