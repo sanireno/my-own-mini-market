@@ -1,12 +1,16 @@
 use axum::{routing::get, Router};
+use axum::routing::post;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
-
 pub mod products_models;
-mod repository;
-mod handler;
-mod category_models;
-
+pub mod user_models;
+pub mod category_models;
+mod category;
+mod product;
+use category::category_handler::*;
+use product::product_handler::*;
+mod user;
+use user::user_handler::*;
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
@@ -25,31 +29,34 @@ async fn main() {
         // products
         .route(
             "/products",
-            get(handler::get_all_product_handler)
-                .post(handler::create_product_handler),
+            get(get_all_product_handler)
+                .post(create_product_handler),
         )
         .route(
             "/products/{id}",
-            get(handler::get_product_handler)
-                .put(handler::update_product_handler)
-                .delete(handler::delete_product_handler),
+            get(get_product_handler)
+                .put(update_product_handler)
+                .delete(delete_product_handler),
         )
 
         // categories
         .route(
             "/categories",
-            get(handler::get_all_category_handler)
-                .post(handler::create_category_handler),
+            get(get_all_category_handler)
+                .post(create_category_handler),
         )
         .route(
             "/categories/{id}",
-            get(handler::get_category_handler)
-                .put(handler::update_category_handler)
-                .delete(handler::delete_category_handler),
+            get(get_category_handler)
+                .put(update_category_handler)
+                .delete(delete_category_handler),
         )
         .route("/categories/{id}/products",
-               get(handler::get_products_from_category_handler)
+               get(get_products_from_category_handler)
         )
+        //user
+        .route("/auth/register",post(create_user_handler))
+        .route("/auth/login",post(login_handler))
 
         .with_state(pool);
     let listener=TcpListener::bind("127.0.0.1:3000")
