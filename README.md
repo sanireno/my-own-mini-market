@@ -120,7 +120,7 @@ DATABASE_URL=postgres://username:password@localhost/database
 JWT_SECRET=your_secret_key
 ```
 
-Do not commit `.env` to Git.
+
 
 Run the application:
 
