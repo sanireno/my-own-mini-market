@@ -1,10 +1,7 @@
-use sqlx::PgPool;
 use crate::products_models::{CreateProduct, Product, UpdateProduct};
+use sqlx::PgPool;
 
-pub async fn create_product(
-    pool: &PgPool,
-    product: CreateProduct,
-) -> Result<Product, sqlx::Error> {
+pub async fn create_product(pool: &PgPool, product: CreateProduct) -> Result<Product, sqlx::Error> {
     sqlx::query_as!(
         Product,
         r#"
@@ -18,13 +15,10 @@ pub async fn create_product(
         product.stock,
         product.category_id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
-pub async fn get_product(
-    pool:&PgPool,
-    id:i64
-)->Result<Product,sqlx::Error>{
+pub async fn get_product(pool: &PgPool, id: i64) -> Result<Product, sqlx::Error> {
     sqlx::query_as!(
         Product,
         r#"
@@ -34,13 +28,10 @@ pub async fn get_product(
         "#,
         id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
-pub async fn delete_product(
-    pool:&PgPool,
-    id:i64
-)->Result<Product,sqlx::Error>{
+pub async fn delete_product(pool: &PgPool, id: i64) -> Result<Product, sqlx::Error> {
     sqlx::query_as!(
         Product,
         r#"
@@ -50,15 +41,14 @@ pub async fn delete_product(
         "#,
         id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
 pub async fn update_product(
     pool: &PgPool,
     id: i64,
     product: UpdateProduct,
 ) -> Result<Product, sqlx::Error> {
-
     sqlx::query_as!(
         Product,
         r#"
@@ -77,12 +67,14 @@ pub async fn update_product(
         product.stock,
         id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
 pub async fn get_all_product(
-    pool:&PgPool,limit:i64,offset:i64
-)->Result<Vec<Product>,sqlx::Error>{
+    pool: &PgPool,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<Product>, sqlx::Error> {
     sqlx::query_as!(
         Product,
         r#"
@@ -93,6 +85,6 @@ pub async fn get_all_product(
         limit,
         offset
     )
-        .fetch_all(pool)
-        .await
+    .fetch_all(pool)
+    .await
 }

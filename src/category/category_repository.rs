@@ -1,9 +1,11 @@
-
-use sqlx::PgPool;
 use crate::category_models::{Category, CreateCategory, UpdateCategory};
 use crate::products_models::Product;
+use sqlx::PgPool;
 
-pub async fn create_category(pool:&PgPool, category:CreateCategory) ->Result<Category,sqlx::Error>{
+pub async fn create_category(
+    pool: &PgPool,
+    category: CreateCategory,
+) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -13,10 +15,10 @@ pub async fn create_category(pool:&PgPool, category:CreateCategory) ->Result<Cat
         "#,
         category.name
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
-pub async fn get_category(pool:&PgPool,id:i64)->Result<Category,sqlx::Error>{
+pub async fn get_category(pool: &PgPool, id: i64) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -26,10 +28,10 @@ pub async fn get_category(pool:&PgPool,id:i64)->Result<Category,sqlx::Error>{
         "#,
         id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
-pub async fn get_all_categories(pool:&PgPool)->Result<Vec<Category>,sqlx::Error>{
+pub async fn get_all_categories(pool: &PgPool) -> Result<Vec<Category>, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -37,13 +39,10 @@ pub async fn get_all_categories(pool:&PgPool)->Result<Vec<Category>,sqlx::Error>
         ORDER BY id
         "#,
     )
-        .fetch_all(pool)
-        .await
+    .fetch_all(pool)
+    .await
 }
-pub async fn delete_category(
-    pool: &PgPool,
-    id: i64,
-) -> Result<Category, sqlx::Error> {
+pub async fn delete_category(pool: &PgPool, id: i64) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -53,8 +52,8 @@ pub async fn delete_category(
         "#,
         id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
 pub async fn update_category(
     pool: &PgPool,
@@ -73,10 +72,13 @@ pub async fn update_category(
         category.name,
         id
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
-pub async fn get_products_from_category(pool:&PgPool,id:i64)->Result<Vec<Product>,sqlx::Error>{
+pub async fn get_products_from_category(
+    pool: &PgPool,
+    id: i64,
+) -> Result<Vec<Product>, sqlx::Error> {
     sqlx::query_as!(
         Product,
         r#"
@@ -87,6 +89,6 @@ pub async fn get_products_from_category(pool:&PgPool,id:i64)->Result<Vec<Product
         "#,
         id
     )
-        .fetch_all(pool)
-        .await
+    .fetch_all(pool)
+    .await
 }

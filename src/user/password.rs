@@ -1,11 +1,6 @@
 use argon2::{
     Argon2,
-    password_hash::{
-        PasswordHasher,
-        PasswordHash,
-        PasswordVerifier,
-        SaltString,
-    },
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
 };
 
 use rand_core::OsRng;
@@ -24,9 +19,7 @@ pub fn verify_password(
 ) -> Result<bool, argon2::password_hash::Error> {
     let parsed_hash = PasswordHash::new(password_hash)?;
 
-    Ok(
-        Argon2::default()
-            .verify_password(password.as_bytes(), &parsed_hash)
-            .is_ok()
-    )
+    Ok(Argon2::default()
+        .verify_password(password.as_bytes(), &parsed_hash)
+        .is_ok())
 }

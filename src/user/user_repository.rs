@@ -1,11 +1,11 @@
-use sqlx::PgPool;
 use crate::user::password::*;
 use crate::user_models::*;
-pub async fn create_user(pool:&PgPool,user:RegisterUser)->Result<User,sqlx::Error>{
-    let hashed_password=hash_password(user.password.as_str()).unwrap();
+use sqlx::PgPool;
+pub async fn create_user(pool: &PgPool, user: RegisterUser) -> Result<User, sqlx::Error> {
+    let hashed_password = hash_password(user.password.as_str()).unwrap();
     sqlx::query_as!(
-       User,
-     r#"
+        User,
+        r#"
         INSERT INTO users (username,email,password_hash)
         VALUES ($1,$2,$3)
         RETURNING id,username,email,password_hash,created_at
@@ -14,10 +14,10 @@ pub async fn create_user(pool:&PgPool,user:RegisterUser)->Result<User,sqlx::Erro
         user.email,
         hashed_password
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
-pub async fn find_user_by_email(pool:&PgPool,email:String)->Result<User,sqlx::Error>{
+pub async fn find_user_by_email(pool: &PgPool, email: String) -> Result<User, sqlx::Error> {
     sqlx::query_as!(
         User,
         r#"
@@ -27,6 +27,6 @@ pub async fn find_user_by_email(pool:&PgPool,email:String)->Result<User,sqlx::Er
         "#,
         email
     )
-        .fetch_one(pool)
-        .await
+    .fetch_one(pool)
+    .await
 }
