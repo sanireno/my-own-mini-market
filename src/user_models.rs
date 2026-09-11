@@ -7,6 +7,7 @@ pub struct User {
     pub email: String,
     pub password_hash: String,
     pub created_at: DateTime<Utc>,
+    pub role: String,
 }
 #[derive(Serialize, Deserialize)]
 pub struct RegisterUser {
@@ -25,6 +26,7 @@ pub struct UserResponse {
     pub username: String,
     pub email: String,
     pub created_at: DateTime<Utc>,
+    pub role: String,
 }
 #[derive(Serialize)]
 pub struct LoginResponse {

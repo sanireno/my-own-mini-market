@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id,username,email,password_hash,created_at\n        FROM users\n        WHERE email=$1\n        ",
+  "query": "\n        INSERT INTO users (username,email,password_hash)\n        VALUES ($1,$2,$3)\n        RETURNING id,username,email,password_hash,created_at,role\n",
   "describe": {
     "columns": [
       {
@@ -57,10 +57,23 @@
             "name": "created_at"
           }
         }
+      },
+      {
+        "ordinal": 5,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "role"
+          }
+        }
       }
     ],
     "parameters": {
       "Left": [
+        "Text",
+        "Text",
         "Text"
       ]
     },
@@ -69,8 +82,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "029152244bd8610ff32d2f2108de4aa317e54ac951ddeedeb7d8a1f16f089a2c"
+  "hash": "7c08dba1016d39a73f5d11d95558066bc1f05b0a2e3f54e488d58e6060dd637c"
 }

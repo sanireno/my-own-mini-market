@@ -1,5 +1,6 @@
 use axum::routing::post;
 use axum::{Router, routing::get};
+use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 mod category;
@@ -11,12 +12,22 @@ use category::category_handler::*;
 use product::product_handler::*;
 mod app_error;
 mod user;
+mod cart_models;
+mod cart;
 
 use user::user_handler::*;
+
+#[derive(Clone)]
+pub struct AppState {
+    pub pool: PgPool,
+    pub jwt_secret: String,
+}
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
     let database_url = std::env::var("DATABASE_URL").expect("не установлен database");
+    let jwt_secret = std::env::var("JWT_SECRET").expect("не найдено секретное слово");
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
@@ -27,6 +38,7 @@ async fn main() {
         .await
         .expect("Ошибка миграций");
     println!("База подключена, миграции применены");
+    let state = AppState { pool, jwt_secret };
     let app = Router::new()
         // products
         .route(
@@ -57,7 +69,7 @@ async fn main() {
         //user
         .route("/auth/register", post(create_user_handler))
         .route("/auth/login", post(login_handler))
-        .with_state(pool);
+        .with_state(state);
     let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }

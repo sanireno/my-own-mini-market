@@ -29,6 +29,7 @@ The project is being developed as a backend development practice project using R
 * User login
 * Password hashing with Argon2
 * JWT token generation and validation
+* Role-based access control for catalogue management
 
 ### Database
 
@@ -79,6 +80,16 @@ The project is being developed as a backend development practice project using R
 | ------ | ---------------- | ------------------------ |
 | POST   | `/auth/register` | Register a new user      |
 | POST   | `/auth/login`    | Log in and receive a JWT |
+
+`GET` requests for products and categories are public. Creating, updating, and deleting
+products or categories requires an administrator token in the `Authorization` header:
+
+```text
+Authorization: Bearer <token>
+```
+
+New users receive the `customer` role. To designate an administrator, update the user's
+`role` to `admin` directly in the database during project setup.
 
 ## Project Structure
 
@@ -141,4 +152,3 @@ SQLx migrations are applied automatically when the application starts.
 Work in progress.
 
 Planned features include protected routes using JWT middleware, user-specific resources, and further marketplace functionality.
-

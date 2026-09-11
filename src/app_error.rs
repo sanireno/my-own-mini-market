@@ -11,6 +11,7 @@ pub enum AppError {
     Conflict,
     Validation(String),
     Unauthorized,
+    Forbidden,
 }
 
 impl From<sqlx::Error> for AppError {
@@ -18,14 +19,16 @@ impl From<sqlx::Error> for AppError {
         match error {
             sqlx::Error::RowNotFound => AppError::NotFound,
             sqlx::Error::Database(database_error) => match database_error.code().as_deref() {
-                Some("23505") => AppError::Conflict,
+                Some("23505") => AppError::Conflict, //23505 — нарушение уникальности
                 Some("23503") => {
+                    //23503 — нарушение внешнего ключа
                     AppError::Validation("Referenced resource does not exist".to_string())
                 }
                 Some("23514") => {
+                    //23514 — нарушение CHECK
                     AppError::Validation("Data violates database constraints".to_string())
                 }
-                Some("23502") => AppError::Validation("Required field is missing".to_string()),
+                Some("23502") => AppError::Validation("Required field is missing".to_string()), //23502 — нарушение NOT NULL
                 _ => {
                     eprintln!("DATABASE ERROR: {database_error}");
                     AppError::InternalServerError
@@ -51,6 +54,7 @@ impl IntoResponse for AppError {
             AppError::Conflict => (StatusCode::CONFLICT, "Conflict".to_string()),
             AppError::Validation(message) => (StatusCode::UNPROCESSABLE_ENTITY, message),
             AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".to_string()),
+            AppError::Forbidden => (StatusCode::FORBIDDEN, "Forbidden".to_string()),
         };
         let body = Json(json!({
             "error": message

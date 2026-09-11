@@ -8,7 +8,7 @@ pub async fn create_user(pool: &PgPool, user: RegisterUser) -> Result<User, sqlx
         r#"
         INSERT INTO users (username,email,password_hash)
         VALUES ($1,$2,$3)
-        RETURNING id,username,email,password_hash,created_at
+        RETURNING id,username,email,password_hash,created_at,role
 "#,
         user.username,
         user.email,
@@ -21,7 +21,7 @@ pub async fn find_user_by_email(pool: &PgPool, email: String) -> Result<User, sq
     sqlx::query_as!(
         User,
         r#"
-        SELECT id,username,email,password_hash,created_at
+        SELECT id,username,email,password_hash,created_at,role
         FROM users
         WHERE email=$1
         "#,
