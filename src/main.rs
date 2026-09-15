@@ -1,5 +1,5 @@
-use axum::routing::post;
-use axum::{Router, routing::get};
+use axum::Router;
+use axum::routing::{get, patch, post};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
@@ -8,12 +8,13 @@ pub mod category_models;
 mod product;
 pub mod products_models;
 pub mod user_models;
+use cart::cart_handler::*;
 use category::category_handler::*;
 use product::product_handler::*;
 mod app_error;
-mod user;
-mod cart_models;
 mod cart;
+mod cart_models;
+mod user;
 
 use user::user_handler::*;
 
@@ -69,6 +70,13 @@ async fn main() {
         //user
         .route("/auth/register", post(create_user_handler))
         .route("/auth/login", post(login_handler))
+        // cart
+        .route("/cart", get(get_cart_handler))
+        .route("/cart/items", post(create_cart_item_handler))
+        .route(
+            "/cart/items/{id}",
+            patch(update_cart_item_handler).delete(delete_cart_item_handler),
+        )
         .with_state(state);
     let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
