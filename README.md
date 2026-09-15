@@ -31,6 +31,14 @@ The project is being developed as a backend development practice project using R
 * JWT token generation and validation
 * Role-based access control for catalogue management
 
+### Cart
+
+* Add products to a user-specific cart
+* Get cart items with current product details and totals
+* Update item quantity
+* Remove cart items
+* Validate quantities against available stock
+
 ### Database
 
 * PostgreSQL
@@ -81,6 +89,20 @@ The project is being developed as a backend development practice project using R
 | POST   | `/auth/register` | Register a new user      |
 | POST   | `/auth/login`    | Log in and receive a JWT |
 
+### Cart
+
+| Method | Endpoint           | Description                         |
+| ------ | ------------------ | ----------------------------------- |
+| GET    | `/cart`            | Get the authenticated user's cart   |
+| POST   | `/cart/items`      | Add a product or increase quantity  |
+| PATCH  | `/cart/items/{id}` | Replace an item's quantity          |
+| DELETE | `/cart/items/{id}` | Remove an item from the user's cart |
+
+All cart endpoints require a valid customer or administrator token. The user ID is
+read from the JWT and is never accepted from the request body. Adding the same product
+again increases its existing quantity. Quantities must be positive and cannot exceed
+the product's current stock.
+
 `GET` requests for products and categories are public. Creating, updating, and deleting
 products or categories requires an administrator token in the `Authorization` header:
 
@@ -109,8 +131,13 @@ src/
 │   ├── user_handler.rs
 │   ├── user_repository.rs
 │   └── mod.rs
+├── cart/
+│   ├── cart_handler.rs
+│   ├── cart_repository.rs
+│   └── mod.rs
 ├── products_models.rs
 ├── category_models.rs
+├── cart_models.rs
 ├── user_models.rs
 └── main.rs
 ```
@@ -129,7 +156,11 @@ Create a `.env` file in the project root:
 ```env
 DATABASE_URL=postgres://username:password@localhost/database
 JWT_SECRET=your_secret_key
+FRONTEND_ORIGIN=http://localhost:5173
 ```
+
+`FRONTEND_ORIGIN` may contain a comma-separated allowlist. If it is omitted, the API
+allows `http://localhost:5173` and `http://127.0.0.1:5173` for local Vite development.
 
 
 

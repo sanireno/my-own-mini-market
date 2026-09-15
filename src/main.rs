@@ -1,8 +1,14 @@
 use axum::Router;
+use axum::http::{
+    HeaderValue, Method,
+    header::{AUTHORIZATION, CONTENT_TYPE},
+};
 use axum::routing::{get, patch, post};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
+use std::time::Duration;
 use tokio::net::TcpListener;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 mod category;
 pub mod category_models;
 mod product;
@@ -40,6 +46,8 @@ async fn main() {
         .expect("Ошибка миграций");
     println!("База подключена, миграции применены");
     let state = AppState { pool, jwt_secret };
+    let frontend_origins = std::env::var("FRONTEND_ORIGIN").ok();
+    let cors = cors_layer(frontend_origins.as_deref());
     let app = Router::new()
         // products
         .route(
@@ -77,7 +85,104 @@ async fn main() {
             "/cart/items/{id}",
             patch(update_cart_item_handler).delete(delete_cart_item_handler),
         )
+        .layer(cors)
         .with_state(state);
     let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+fn cors_layer(configured_origins: Option<&str>) -> CorsLayer {
+    let configured_origins =
+        configured_origins.unwrap_or("http://localhost:5173,http://127.0.0.1:5173");
+    let allowed_origins = configured_origins
+        .split(',')
+        .map(str::trim)
+        .filter(|origin| !origin.is_empty())
+        .map(|origin| {
+            origin
+                .parse::<HeaderValue>()
+                .expect("FRONTEND_ORIGIN contains an invalid origin")
+        })
+        .collect::<Vec<_>>();
+
+    assert!(
+        !allowed_origins.is_empty(),
+        "FRONTEND_ORIGIN must contain at least one origin"
+    );
+
+    CorsLayer::new()
+        .allow_origin(AllowOrigin::list(allowed_origins))
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::PATCH,
+            Method::DELETE,
+        ])
+        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
+        .max_age(Duration::from_secs(3600))
+}
+
+#[cfg(test)]
+mod cors_tests {
+    use super::cors_layer;
+    use axum::Router;
+    use axum::body::Body;
+    use axum::http::{
+        Method, Request, StatusCode,
+        header::{ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_METHOD, ORIGIN},
+    };
+    use axum::routing::get;
+    use tower::ServiceExt;
+
+    fn test_app() -> Router {
+        Router::new()
+            .route("/", get(|| async {}))
+            .layer(cors_layer(Some("http://localhost:5173")))
+    }
+
+    #[tokio::test]
+    async fn allows_configured_origin() {
+        let response = test_app()
+            .oneshot(
+                Request::builder()
+                    .method(Method::OPTIONS)
+                    .uri("/")
+                    .header(ORIGIN, "http://localhost:5173")
+                    .header(ACCESS_CONTROL_REQUEST_METHOD, "POST")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(
+            response.headers().get(ACCESS_CONTROL_ALLOW_ORIGIN),
+            Some(&"http://localhost:5173".parse().unwrap())
+        );
+    }
+
+    #[tokio::test]
+    async fn rejects_unconfigured_origin() {
+        let response = test_app()
+            .oneshot(
+                Request::builder()
+                    .method(Method::OPTIONS)
+                    .uri("/")
+                    .header(ORIGIN, "https://untrusted.example")
+                    .header(ACCESS_CONTROL_REQUEST_METHOD, "POST")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert!(
+            response
+                .headers()
+                .get(ACCESS_CONTROL_ALLOW_ORIGIN)
+                .is_none()
+        );
+    }
 }
