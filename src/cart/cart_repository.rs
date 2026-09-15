@@ -8,6 +8,8 @@ use crate::cart_models::{CartItem, CreateCartItem};
 // GET    /cart             получить корзину
 // PATCH  /cart/items/:id   изменить quantity
 // DELETE /cart/items/:id   удалить товар
+
+//POST
 pub async fn create_cart(pool:&PgPool,cart_item: CreateCartItem)->Result<CartItem, sqlx::Error>{
     sqlx::query_as!(
         CartItem,
@@ -22,4 +24,18 @@ pub async fn create_cart(pool:&PgPool,cart_item: CreateCartItem)->Result<CartIte
 
     )
         .fetch_one(pool).await
+}
+pub async fn get_cart(pool: &PgPool, user_id: i64) -> Result<Vec<CartItem>, sqlx::Error> {
+    sqlx::query_as!(
+        CartItem,
+        r#"
+        SELECT id, user_id, product_id, quantity, created_at, updated_at
+        FROM cart_items
+        WHERE user_id = $1
+        ORDER BY id
+        "#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await
 }
