@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct Product {
     pub id: i64,
     pub name: String,
     pub description: String,
     pub price: i64,
     pub stock: i32,
+    pub available_stock: i32,
     pub category_id: Option<i64>,
 }
 #[derive(Serialize, Deserialize)]

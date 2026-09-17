@@ -1,6 +1,6 @@
 use axum::Router;
 use axum::http::{
-    HeaderValue, Method,
+    HeaderName, HeaderValue, Method,
     header::{AUTHORIZATION, CONTENT_TYPE},
 };
 use axum::routing::{get, patch, post};
@@ -20,8 +20,13 @@ use product::product_handler::*;
 mod app_error;
 mod cart;
 mod cart_models;
+mod inventory;
+mod order;
+mod order_models;
 mod user;
 
+use order::order_handler::*;
+use order::order_service::expire_pending_orders;
 use user::user_handler::*;
 
 #[derive(Clone)]
@@ -45,6 +50,7 @@ async fn main() {
         .await
         .expect("Ошибка миграций");
     println!("База подключена, миграции применены");
+    spawn_expired_order_worker(pool.clone());
     let state = AppState { pool, jwt_secret };
     let frontend_origins = std::env::var("FRONTEND_ORIGIN").ok();
     let cors = cors_layer(frontend_origins.as_deref());
@@ -85,6 +91,15 @@ async fn main() {
             "/cart/items/{id}",
             patch(update_cart_item_handler).delete(delete_cart_item_handler),
         )
+        // checkout and orders
+        .route("/checkout", post(checkout_handler))
+        .route("/orders", get(list_orders_handler))
+        .route("/orders/{id}", get(get_order_handler))
+        .route("/orders/{id}/cancel", post(cancel_order_handler))
+        .route(
+            "/orders/{id}/simulate-payment",
+            post(simulate_payment_handler),
+        )
         .layer(cors)
         .with_state(state);
     let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
@@ -119,8 +134,24 @@ fn cors_layer(configured_origins: Option<&str>) -> CorsLayer {
             Method::PATCH,
             Method::DELETE,
         ])
-        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
+        .allow_headers([
+            AUTHORIZATION,
+            CONTENT_TYPE,
+            HeaderName::from_static("idempotency-key"),
+        ])
         .max_age(Duration::from_secs(3600))
+}
+
+fn spawn_expired_order_worker(pool: PgPool) {
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(30));
+        loop {
+            interval.tick().await;
+            if let Err(error) = expire_pending_orders(&pool).await {
+                eprintln!("failed to expire pending orders: {error:?}");
+            }
+        }
+    });
 }
 
 #[cfg(test)]

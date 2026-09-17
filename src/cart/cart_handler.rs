@@ -18,7 +18,7 @@ pub async fn create_cart_item_handler(
         .await?
         .ok_or_else(|| {
             AppError::Validation(
-                "Product does not exist or requested quantity exceeds stock".to_string(),
+                "Product does not exist or requested quantity exceeds available stock".to_string(),
             )
         })?;
     Ok(Json(cart_item))
@@ -47,7 +47,7 @@ pub async fn update_cart_item_handler(
         Some(cart_item) => cart_item,
         None if cart_item_exists(&state.pool, auth_user.id, item_id).await? => {
             return Err(AppError::Validation(
-                "Requested quantity exceeds product stock".to_string(),
+                "Requested quantity exceeds available product stock".to_string(),
             ));
         }
         None => return Err(AppError::NotFound),

@@ -6,34 +6,31 @@ pub async fn create_category(
     pool: &PgPool,
     category: CreateCategory,
 ) -> Result<Category, sqlx::Error> {
-    sqlx::query_as!(
-        Category,
+    sqlx::query_as::<_, Category>(
         r#"
         INSERT INTO categories (name)
         VALUES ($1)
         RETURNING id,name
         "#,
-        category.name
     )
+    .bind(category.name)
     .fetch_one(pool)
     .await
 }
 pub async fn get_category(pool: &PgPool, id: i64) -> Result<Category, sqlx::Error> {
-    sqlx::query_as!(
-        Category,
+    sqlx::query_as::<_, Category>(
         r#"
         SELECT id,name
         FROM categories
         WHERE id=$1
         "#,
-        id
     )
+    .bind(id)
     .fetch_one(pool)
     .await
 }
 pub async fn get_all_categories(pool: &PgPool) -> Result<Vec<Category>, sqlx::Error> {
-    sqlx::query_as!(
-        Category,
+    sqlx::query_as::<_, Category>(
         r#"
         SELECT id,name FROM categories
         ORDER BY id
@@ -43,15 +40,14 @@ pub async fn get_all_categories(pool: &PgPool) -> Result<Vec<Category>, sqlx::Er
     .await
 }
 pub async fn delete_category(pool: &PgPool, id: i64) -> Result<Category, sqlx::Error> {
-    sqlx::query_as!(
-        Category,
+    sqlx::query_as::<_, Category>(
         r#"
         DELETE FROM categories
         WHERE id=$1
         RETURNING id,name
         "#,
-        id
     )
+    .bind(id)
     .fetch_one(pool)
     .await
 }
@@ -60,8 +56,7 @@ pub async fn update_category(
     id: i64,
     category: UpdateCategory,
 ) -> Result<Category, sqlx::Error> {
-    sqlx::query_as!(
-        Category,
+    sqlx::query_as::<_, Category>(
         r#"
         UPDATE categories
         SET
@@ -69,9 +64,9 @@ pub async fn update_category(
         WHERE id = $2
         RETURNING id,name
         "#,
-        category.name,
-        id
     )
+    .bind(category.name)
+    .bind(id)
     .fetch_one(pool)
     .await
 }
@@ -79,16 +74,16 @@ pub async fn get_products_from_category(
     pool: &PgPool,
     id: i64,
 ) -> Result<Vec<Product>, sqlx::Error> {
-    sqlx::query_as!(
-        Product,
+    sqlx::query_as::<_, Product>(
         r#"
-        SELECT id, name, description, price, stock, category_id
+        SELECT id, name, description, price, stock,
+               stock - reserved_stock AS available_stock, category_id
         FROM products
         WHERE category_id = $1
         ORDER BY id
         "#,
-        id
     )
+    .bind(id)
     .fetch_all(pool)
     .await
 }

@@ -39,6 +39,15 @@ The project is being developed as a backend development practice project using R
 * Remove cart items
 * Validate quantities against available stock
 
+### Orders and inventory reservations
+
+* Atomically create an order from the authenticated user's cart
+* Reserve stock for 15 minutes while an order awaits payment
+* Keep immutable product names and prices in order items
+* Cancel orders and release their reserved stock
+* Expire abandoned reservations in a background worker
+* Simulate payment during development
+
 ### Database
 
 * PostgreSQL
@@ -98,6 +107,25 @@ The project is being developed as a backend development practice project using R
 | PATCH  | `/cart/items/{id}` | Replace an item's quantity          |
 | DELETE | `/cart/items/{id}` | Remove an item from the user's cart |
 
+### Orders
+
+| Method | Endpoint                         | Description                              |
+| ------ | -------------------------------- | ---------------------------------------- |
+| POST   | `/checkout`                      | Create an order and reserve cart items   |
+| GET    | `/orders`                        | List the authenticated user's orders     |
+| GET    | `/orders/{id}`                   | Get an order with its immutable items    |
+| POST   | `/orders/{id}/cancel`            | Cancel an order and release its stock    |
+| POST   | `/orders/{id}/simulate-payment`  | Simulate successful payment locally      |
+
+`POST /checkout` accepts an optional `Idempotency-Key` header (1–128 ASCII
+characters). Repeating the request with the same key returns the original order
+without reserving stock twice. A pending order reserves stock for 15 minutes.
+
+`POST /orders/{id}/simulate-payment` is intentionally a development-only stub.
+It must be removed or replaced by payment-intent creation and a verified provider
+webhook before real payments are introduced. A browser client must never be trusted
+to mark an order as paid.
+
 All cart endpoints require a valid customer or administrator token. The user ID is
 read from the JWT and is never accepted from the request body. Adding the same product
 again increases its existing quantity. Quantities must be positive and cannot exceed
@@ -135,9 +163,18 @@ src/
 │   ├── cart_handler.rs
 │   ├── cart_repository.rs
 │   └── mod.rs
+├── order/
+│   ├── order_handler.rs
+│   ├── order_repository.rs
+│   ├── order_service.rs
+│   └── mod.rs
+├── inventory/
+│   ├── inventory_repository.rs
+│   └── mod.rs
 ├── products_models.rs
 ├── category_models.rs
 ├── cart_models.rs
+├── order_models.rs
 ├── user_models.rs
 └── main.rs
 ```
