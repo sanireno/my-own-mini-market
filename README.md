@@ -2,8 +2,6 @@
 
 A REST API for a small marketplace written in Rust.
 
-The project is being developed as a backend development practice project using Rust, Axum and PostgreSQL.
-
 ## Features
 
 ### Products
