@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MARKET — интернет-магазин товаров</title>
+    <meta
+      name="description"
+      content="Универсальный интернет-магазин товаров для дома, работы и жизни."
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container header__inner">
+        <a class="logo" href="index.html">
+          <span class="logo__mark">M</span>
+          <span class="logo__text">MARKET</span>
+        </a>
+
+        <div class="header__actions">
+          <a class="header-account-link" href="html/register.html">Регистрация</a>
+          <a class="header-account-link" href="html/login.html">Вход</a>
+          <a href="html/cart.html" class="cart-link">Корзина <span class="cart-count">0</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <div class="container hero__grid">
+          <div class="hero__content">
+            <h1>Вещи для<br /><em>хорошей жизни.</em></h1>
+            <p class="hero__text">
+              Товары для дома, работы и отдыха с быстрой доставкой и честными ценами.
+            </p>
+
+            <div class="hero__actions">
+              <a href="#catalog" class="btn btn--primary">Смотреть каталог <span>→</span></a>
+              <a href="#about" class="btn btn--secondary">Почему MARKET?</a>
+            </div>
+
+            <ul class="hero__stats" aria-label="Показатели компании">
+              <li><strong>2.5k+</strong><span>клиентов</span></li>
+              <li><strong>12 лет</strong><span>на рынке</span></li>
+              <li><strong>98%</strong><span>рекомендуют нас</span></li>
+            </ul>
+          </div>
+
+          <div class="hero__visual" aria-label="Изображение товаров для дома">
+            <div class="bike-card bike-card--main">
+              <div class="bike-card__image hero-bike-image">
+                <div class="motion-product" aria-hidden="true"><span class="motion-product__beam"></span><span class="motion-product__shade"></span><span class="motion-product__stem"></span><span class="motion-product__base"></span></div>
+                <div class="motion-card motion-card--left" aria-hidden="true"><span>01 / NEW</span><strong>LIGHT</strong><small>soft edition</small></div>
+                <div class="motion-card motion-card--right" aria-hidden="true"><span>02 / 04</span><strong>HOME</strong><small>daily objects</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="catalog" id="catalog">
+        <div class="container">
+          <div class="section-heading section-heading--row">
+            <div>
+              <h2>Популярные товары</h2>
+            </div>
+            <div class="catalog-tabs" role="tablist"><button class="is-active" data-filter="all">Все</button><button data-filter="home">Дом</button><button data-filter="work">Работа</button><button data-filter="style">Стиль</button></div>
+          </div>
+
+          <div class="catalog__grid">
+            <article class="product-card" data-category="home">
+              <div class="product-card__image product-card__image--one"></div>
+              <div class="product-card__body">
+                <span class="product-card__tag">Дом</span>
+                <h3>Лампа Halo</h3>
+                <p>Мягкий свет и спокойная атмосфера для вечера.</p>
+                <div class="product-card__footer">
+                  <strong>4 900 ₽</strong>
+                  <button class="add-to-cart" data-name="Лампа Halo" data-price="4900" data-image="product-card__image--one">В корзину +</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="product-card" data-category="work">
+              <div class="product-card__image product-card__image--two"></div>
+              <div class="product-card__body">
+                <span class="product-card__tag">Работа</span>
+                <h3>Рюкзак Daily</h3>
+                <p>Вместительный рюкзак для города и рабочих будней.</p>
+                <div class="product-card__footer">
+                  <strong>7 500 ₽</strong>
+                  <button class="add-to-cart" data-name="Рюкзак Daily" data-price="7500" data-image="product-card__image--two">В корзину +</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="product-card" data-category="style">
+              <div class="product-card__image product-card__image--three"></div>
+              <div class="product-card__body">
+                <span class="product-card__tag">Стиль</span>
+                <h3>Керамическая ваза</h3>
+                <p>Лаконичная деталь, которая соберёт интерьер.</p>
+                <div class="product-card__footer">
+                  <strong>2 490 ₽</strong>
+                  <button class="add-to-cart" data-name="Керамическая ваза" data-price="2490" data-image="product-card__image--three">В корзину +</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="about" id="about">
+        <div class="container about__grid">
+          <div class="about__content">
+            <p class="eyebrow">MARKET community</p>
+            <h2>Больше, чем просто покупки</h2>
+            <p>
+              Мы собираем полезные и красивые вещи в одном месте, чтобы повседневные покупки становились проще.
+            </p>
+            <p>
+              Присоединяйся к MARKET и открывай новые бренды вместе с нами.
+            </p>
+            <a href="html/register.html" class="btn btn--primary">Создать аккаунт</a>
+          </div>
+
+          <div class="about__panel">
+            <div class="mini-stat">
+              <strong>350+</strong>
+              <span>проверенных моделей</span>
+            </div>
+            <div class="mini-stat">
+              <strong>24/7</strong>
+              <span>поддержка клиентов</span>
+            </div>
+            <div class="mini-stat">
+              <strong>12</strong>
+              <span>партнёрских сервисов</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer" id="contacts">
+      <div class="container footer__inner">
+        <div>
+          <div class="logo logo--footer">
+            <span class="logo__mark">M</span>
+            <span class="logo__text">MARKET</span>
+          </div>
+          <p>Полезные вещи для дома, работы и жизни.</p>
+        </div>
+
+        <div class="footer__links">
+          <div>
+            <h4>Навигация</h4>
+            <a href="index.html">Магазин</a>
+            <a href="#catalog">Каталог</a>
+            <a href="html/admin.html">Админ-панель</a>
+          </div>
+          <div>
+            <h4>Контакты</h4>
+            <a href="tel:+78005553535">+7 (800) 555-35-35</a>
+            <a href="mailto:hello@market.ru">hello@market.ru</a>
+            <span>г. Москва, ул. Центральная, 15</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="container footer__bottom">
+        <span>© 2026 Market. Все права защищены.</span>
+      </div>
+    </footer>
+    <script src="js/app.js?v=11"></script>
+  </body>
+</html>
