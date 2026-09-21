@@ -20,7 +20,7 @@ pub struct LoginUser {
     pub email: String,
     pub password: String,
 }
-#[derive(Serialize)]
+#[derive(Serialize, sqlx::FromRow)]
 pub struct UserResponse {
     pub id: i64,
     pub username: String,

@@ -2,7 +2,8 @@ use crate::AppState;
 use crate::app_error::AppError;
 use crate::user::auth::*;
 use crate::user::password::verify_password;
-use crate::user::user_repository::{create_user, find_user_by_email};
+use crate::user::user_repository::{create_user, find_user_by_email, find_user_profile_by_id};
+use crate::user::validation::{normalize_email, validate_registration};
 use crate::user_models::{LoginResponse, LoginUser, RegisterUser, UserResponse};
 use axum::Json;
 use axum::extract::State;
@@ -10,6 +11,7 @@ pub async fn create_user_handler(
     State(state): State<AppState>,
     Json(user): Json<RegisterUser>,
 ) -> Result<Json<UserResponse>, AppError> {
+    let user = validate_registration(user)?;
     let user = create_user(&state.pool, user).await?;
     let user_response = UserResponse {
         id: user.id,
@@ -24,7 +26,7 @@ pub async fn login_handler(
     State(state): State<AppState>,
     Json(login): Json<LoginUser>,
 ) -> Result<Json<LoginResponse>, AppError> {
-    let user = find_user_by_email(&state.pool, login.email)
+    let user = find_user_by_email(&state.pool, normalize_email(&login.email))
         .await
         .map_err(|error| match error {
             sqlx::Error::RowNotFound => AppError::Unauthorized,
@@ -43,4 +45,17 @@ pub async fn login_handler(
             Err(AppError::InternalServerError)
         }
     }
+}
+
+pub async fn get_current_user_handler(
+    State(state): State<AppState>,
+    auth_user: AuthUser,
+) -> Result<Json<UserResponse>, AppError> {
+    let user = find_user_profile_by_id(&state.pool, auth_user.id)
+        .await
+        .map_err(|error| match error {
+            sqlx::Error::RowNotFound => AppError::Unauthorized,
+            error => AppError::from(error),
+        })?;
+    Ok(Json(user))
 }

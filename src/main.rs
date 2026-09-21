@@ -53,8 +53,14 @@ async fn main() {
     spawn_expired_order_worker(pool.clone());
     let state = AppState { pool, jwt_secret };
     let frontend_origins = std::env::var("FRONTEND_ORIGIN").ok();
-    let cors = cors_layer(frontend_origins.as_deref());
-    let app = Router::new()
+    let app = build_app(state, frontend_origins.as_deref());
+    let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+fn build_app(state: AppState, frontend_origins: Option<&str>) -> Router {
+    let cors = cors_layer(frontend_origins);
+    Router::new()
         // products
         .route(
             "/products",
@@ -84,6 +90,7 @@ async fn main() {
         //user
         .route("/auth/register", post(create_user_handler))
         .route("/auth/login", post(login_handler))
+        .route("/auth/me", get(get_current_user_handler))
         // cart
         .route("/cart", get(get_cart_handler))
         .route("/cart/items", post(create_cart_item_handler))
@@ -101,9 +108,7 @@ async fn main() {
             post(simulate_payment_handler),
         )
         .layer(cors)
-        .with_state(state);
-    let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+        .with_state(state)
 }
 
 fn cors_layer(configured_origins: Option<&str>) -> CorsLayer {
@@ -217,3 +222,6 @@ mod cors_tests {
         );
     }
 }
+
+#[cfg(test)]
+mod backend_tests;

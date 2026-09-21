@@ -95,6 +95,34 @@ A REST API for a small marketplace written in Rust.
 | ------ | ---------------- | ------------------------ |
 | POST   | `/auth/register` | Register a new user      |
 | POST   | `/auth/login`    | Log in and receive a JWT |
+| GET    | `/auth/me`       | Get the current authenticated user |
+
+`GET /auth/me` requires `Authorization: Bearer <token>`. It reads the user ID
+from the verified JWT and returns the current database values for `id`, `username`,
+`email`, `created_at`, and `role`. Password hashes are never selected or returned.
+Missing, invalid, expired tokens and users that no longer exist return HTTP 401.
+This endpoint does not change the JWT role or renew the token.
+
+Registration rules (HTTP 422 with an `error` message on validation failure):
+
+* Username: trim surrounding whitespace, then require 1–100 Unicode characters
+  with no control characters. Duplicate display names remain allowed.
+* Email: trim surrounding whitespace; require a conventional ASCII address with
+  a dot-atom local part and a dotted domain, at most 254 bytes in total. Quoted
+  local parts, IP literals, and internationalized addresses are not supported.
+* Password: 8–128 Unicode characters, not entirely whitespace. The password is
+  never trimmed or otherwise normalized.
+
+Login also trims the email. Email matching remains case-sensitive for compatibility
+with existing accounts; this change does not rewrite stored addresses. Changing
+that policy requires a migration and handling existing case/whitespace collisions.
+Duplicate emails continue to return HTTP 409. Format validation does not verify
+mailbox ownership or deliverability.
+
+`GET /products` accepts `page` (default 1) and `limit` (default 20).
+`page` must be between 1 and 4294967295; `limit` must be between 1 and 100.
+Invalid query values return HTTP 400. Offset calculation uses 64-bit arithmetic.
+A valid page beyond the catalogue returns an empty array.
 
 ### Cart
 
@@ -218,3 +246,15 @@ SQLx migrations are applied automatically when the application starts.
 Work in progress.
 
 Planned features include protected routes using JWT middleware, user-specific resources, and further marketplace functionality.
+
+## Backend checks
+
+```bash
+cargo fmt --check
+cargo test --locked
+cargo clippy --locked --all-targets -- -D warnings
+```
+
+Tests cover registration validation, pagination boundaries, and HTTP rejection of
+invalid registration, pagination, and authentication requests without a database.
+They do not replace integration testing against PostgreSQL.

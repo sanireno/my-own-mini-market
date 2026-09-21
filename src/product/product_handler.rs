@@ -45,9 +45,7 @@ pub async fn get_all_product_handler(
     State(state): State<AppState>,
     Query(params): Query<Pagination>,
 ) -> Result<Json<Vec<Product>>, AppError> {
-    let page = params.page.unwrap_or(1);
-    let limit = params.limit.unwrap_or(20);
-    let offset = (page - 1) * limit;
-    let product = get_all_product(&state.pool, limit as i64, offset as i64).await?;
+    let (limit, offset) = params.limit_and_offset()?;
+    let product = get_all_product(&state.pool, limit, offset).await?;
     Ok(Json(product))
 }

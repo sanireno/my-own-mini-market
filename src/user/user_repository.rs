@@ -28,3 +28,12 @@ pub async fn find_user_by_email(pool: &PgPool, email: String) -> Result<User, sq
     .fetch_one(pool)
     .await
 }
+
+pub async fn find_user_profile_by_id(pool: &PgPool, id: i64) -> Result<UserResponse, sqlx::Error> {
+    sqlx::query_as::<_, UserResponse>(
+        "SELECT id, username, email, created_at, role FROM users WHERE id = $1",
+    )
+    .bind(id)
+    .fetch_one(pool)
+    .await
+}
