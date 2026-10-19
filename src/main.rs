@@ -28,6 +28,7 @@ mod user;
 use order::order_handler::*;
 use order::order_service::expire_pending_orders;
 use user::user_handler::*;
+use crate::product::product_repository::get_filter_product;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -85,7 +86,7 @@ fn build_app(state: AppState, frontend_origins: Option<&str>) -> Router {
         )
         .route(
             "/categories/{id}/products",
-            get(get_products_from_category_handler),
+            get(get_filter_product_handler),
         )
         //user
         .route("/auth/register", post(create_user_handler))

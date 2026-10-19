@@ -89,3 +89,20 @@ pub async fn get_all_product(
     .fetch_all(pool)
     .await
 }
+pub async fn get_filter_product(pool:&PgPool,category_id:i64,limit:i64,offset:i64)->Result<Vec<Product>,sqlx::Error>{
+    sqlx::query_as::<_,Product>(
+        r#"
+            SELECT id,name,description,price,stock,
+                   stock-reserved_stock AS available_stock,category_id
+            FROM products
+            WHERE category_id=$1
+            ORDER BY id
+            LIMIT $2 OFFSET $3
+            "#,
+    )
+        .bind(category_id)
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(pool)
+        .await
+}

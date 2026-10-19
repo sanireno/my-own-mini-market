@@ -49,3 +49,12 @@ pub async fn get_all_product_handler(
     let product = get_all_product(&state.pool, limit, offset).await?;
     Ok(Json(product))
 }
+pub async fn get_filter_product_handler(
+    State(state):State<AppState>,
+    Query(params):Query<Pagination>,
+    Path(id):Path<i64>
+)->Result<Json<Vec<Product>>,AppError>{
+    let (limit,offset)=params.limit_and_offset()?;
+    let product=get_filter_product(&state.pool,id,limit,offset).await?;
+    Ok(Json(product))
+}
